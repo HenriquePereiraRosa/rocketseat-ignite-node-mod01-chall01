@@ -11,10 +11,10 @@ const users = [];
 
 function checksExistsUserAccount(request, response, next) {
 
-  let username = request.body.username;
+  let username = request.headers.username;
 
   if (!username)
-    username = request.params.username;
+    username = request.body.username;
 
   if (!username)
     return response.status(400).json({ error: "Username can't be empty!" }).send();
@@ -35,10 +35,10 @@ function checksAlreadyExists(request, response, next) {
 
 function checksUsernameField(request, response, next) {
 
-  let username = request.body.username;
+  let username = request.headers.username;
 
   if (!username)
-    username = request.params.username;
+    username = request.body.username;
 
   if (!username)
     return response.status(400).json({ error: "Username can't be empty!" }).send();
@@ -78,19 +78,19 @@ app.get('/users', (request, response) => {
   return response.json(users).send();
 });
 
-app.get('/todos/username/:username',
+app.get('/todos/',
   checksUsernameField,
   (request, response) => {
-    const user = users.find(u => u.username === request.params.username);
+    const user = users.find(u => u.username === request.headers.username);
     if (!user)
       return response.status(404).json({ error: "User not found" }).send();
     return response.json(user.todos).send();
   });
 
-app.post('/todos/username/:username',
+app.post('/todos/',
   checksExistsUserAccount,
   (request, response) => {
-    let user = users.find(u => u.username === request.params.username);
+    let user = users.find(u => u.username === request.headers.username);
 
     console.log(user); // TODO remove
 
@@ -104,11 +104,11 @@ app.post('/todos/username/:username',
     return response.status(201).send();
   });
 
-app.put('/todos/username/:username/todoId/:id',
+app.put('/todos/todoId/:id',
   checksExistsUserAccount,
   (request, response) => {
 
-    const reqUsername = request.params.username;
+    const reqUsername = request.headers.username;
     const reqTodoId = request.params.id;
     const reqTodoTitle = request.body.title;
     const reqTodoDeadline = request.body.deadline;
@@ -128,11 +128,11 @@ app.put('/todos/username/:username/todoId/:id',
     return response.json(todo).send();
   });
 
-app.patch('/todos/username/:username/todoId/:id/done',
+app.patch('/todos/:id/done',
   checksExistsUserAccount,
   (request, response) => {
 
-    const reqUsername = request.params.username;
+    const reqUsername = request.headers.username;
     const reqTodoId = request.params.id;
 
     const user = users.find(u => u.username === reqUsername);
@@ -146,9 +146,9 @@ app.patch('/todos/username/:username/todoId/:id/done',
     return response.json(todo).send();
   });
 
-app.delete('/todos/username/:username/todoId/:id/', checksExistsUserAccount, (request, response) => {
+app.delete('/todos/:id/', checksExistsUserAccount, (request, response) => {
 
-  const reqUsername = request.params.username;
+  const reqUsername = request.headers.username;
   const reqTodoId = request.params.id;
 
   const user = users.find(u => u.username === reqUsername);
